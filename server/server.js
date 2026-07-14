@@ -8,7 +8,24 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://client-silk-psi-23.vercel.app',
+    process.env.FRONTEND_URL
+].filter(Boolean);
+
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (e.g., mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.some(o => origin.startsWith(o.replace('*', '')))) {
+            return callback(null, true);
+        }
+        return callback(new Error(`CORS: ${origin} not allowed`));
+    },
+    credentials: true
+}));
 app.use(express.json());
 
 const apiRoutes = require('./routes');
