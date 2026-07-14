@@ -1,0 +1,36 @@
+# Root .gitignore - Museum Booking System
+
+# Node modules
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Environment variables - DO NOT COMMIT SECRETS
+.env
+client/.env
+client/.env.local
+client/.env.production
+server/.env
+
+# Build outputs
+client/dist/
+client/build/
+
+# SQLite database (local only, not for version control)
+*.sqlite
+server/db.sqlite
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel
+
+# IDE
+.vscode/
+*.swp
