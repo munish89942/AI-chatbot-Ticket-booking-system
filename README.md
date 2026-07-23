@@ -60,21 +60,45 @@ The app will be available at `http://localhost:5173`.
 - **Live Frontend (Vercel)**: [https://client-silk-psi-23.vercel.app](https://client-silk-psi-23.vercel.app)
 - **Live Backend (Railway)**: `https://<your-railway-app-url>.up.railway.app` (Configure yours and link to Vercel via env variables)
 
-### Frontend Deployment (Vercel)
-The client frontend is optimized for deployment on Vercel:
-1. Set the build directory / framework root to `client/`.
-2. Add the environment variable `VITE_API_URL` pointing to your Railway backend: `https://<your-railway-app-url>.up.railway.app/api`.
+### 🚀 Backend Deployment (Railway)
+Since this repository is a monorepo, follow these steps to deploy the backend (`/server`) service correctly on Railway:
 
-### Backend Deployment (Railway)
-The server backend is configured for persistent deployment on Railway:
-1. Set the service **Root Directory** to `/server`.
-2. Attach a **Persistent Volume** and mount it to `/data` to prevent SQLite database resets across container redeploys.
-3. Configure the following environment variables on Railway:
-   - `GEMINI_API_KEY`: Your Google Gemini API Key
-   - `RAZORPAY_KEY_ID`: Your Razorpay Test Key ID
-   - `RAZORPAY_KEY_SECRET`: Your Razorpay Test Key Secret
-   - `DATABASE_PATH`: `/data/db.sqlite`
-   - `FRONTEND_URL`: `https://client-silk-psi-23.vercel.app` (to allow CORS requests)
+1. **Create a Railway Project**:
+   - Go to [Railway](https://railway.app/) and log in.
+   - Click **New Project** -> **Deploy from GitHub repo**.
+   - Select this repository (`AI-chatbot-Ticket-booking-system`).
+   
+2. **Configure Service Root Directory**:
+   - In the Railway project board, click on the newly created service.
+   - Go to the **Settings** tab.
+   - Under the **General** section, locate the **Root Directory** field and set it to `/server`.
+   - Scroll down to the **Config as Code** setting and specify `/server/railway.json` if it's not automatically detected.
+
+3. **Configure Environment Variables**:
+   - Go to the **Variables** tab of the service.
+   - Add the following environment variables:
+     * `GEMINI_API_KEY`: Your Google Gemini API Key.
+     * `RAZORPAY_KEY_ID`: Your Razorpay Test Key ID.
+     * `RAZORPAY_KEY_SECRET`: Your Razorpay Test Key Secret.
+     * `DATABASE_PATH`: `/data/db.sqlite` (points to the persistent volume path).
+     * `FRONTEND_URL`: `https://client-silk-psi-23.vercel.app` (to allow CORS requests).
+
+4. **Attach a Persistent Volume** (Required for SQLite database persistence):
+   - Under the service settings, go to the **Volume** tab.
+   - Click **Add Volume**.
+   - Set the mount path to `/data`.
+   - This ensures the SQLite database file (`db.sqlite`) persists across redeployments and container restarts.
+
+5. **Deploy**:
+   - Save all configurations. Railway will trigger a build using the Nixpacks builder specified in `server/railway.json` and start the server.
+
+### 🎨 Frontend Deployment (Vercel)
+The React client frontend is optimized for deployment on Vercel:
+1. Connect this repository to Vercel.
+2. In the project settings, set the **Framework Preset** to `Vite` and the **Root Directory** to `client`.
+3. Add the following environment variable:
+   - `VITE_API_URL`: Point this to your Railway backend: `https://<your-railway-app-url>.up.railway.app/api`.
+
 
 ## ✨ Features
 
