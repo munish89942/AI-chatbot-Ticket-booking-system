@@ -58,7 +58,7 @@ The app will be available at `http://localhost:5173`.
 ## 🌐 Deployment
 
 - **Live Frontend (Vercel)**: [https://client-silk-psi-23.vercel.app](https://client-silk-psi-23.vercel.app)
-- **Live Backend (Railway)**: `https://<your-railway-app-url>.up.railway.app` (Configure yours and link to Vercel via env variables)
+- **Live Backend (Railway)**: [https://backend-production-1f7f.up.railway.app](https://backend-production-1f7f.up.railway.app)
 
 ### 🚀 Backend Deployment (Railway)
 Since this repository is a monorepo, follow these steps to deploy the backend (`/server`) service correctly on Railway:
@@ -97,7 +97,7 @@ The React client frontend is optimized for deployment on Vercel:
 1. Connect this repository to Vercel.
 2. In the project settings, set the **Framework Preset** to `Vite` and the **Root Directory** to `client`.
 3. Add the following environment variable:
-   - `VITE_API_URL`: Point this to your Railway backend: `https://<your-railway-app-url>.up.railway.app/api`.
+   - `VITE_API_URL`: Point this to your Railway backend: `https://backend-production-1f7f.up.railway.app/api`.
 
 
 ## ✨ Features
