@@ -53,7 +53,9 @@ export default function ChatInterface() {
 
             setMessages(prev => [...prev, { role: 'assistant', content: displayContent }]);
         } catch (error) {
-            setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I encountered an error. Please try again." }]);
+            console.error("Chat Error:", error);
+            const detail = error.response?.data?.error || error.message || "Network Error";
+            setMessages(prev => [...prev, { role: 'assistant', content: `Sorry, I encountered an error (${detail}). Please try again.` }]);
         } finally {
             setLoading(false);
         }
