@@ -7,7 +7,7 @@ const getBaseURL = () => {
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
         return 'http://localhost:3001/api';
     }
-    return 'https://backend-production-1f7f.up.railway.app/api';
+    return 'https://museum-booking-api.onrender.com/api';
 };
 
 const api = axios.create({
