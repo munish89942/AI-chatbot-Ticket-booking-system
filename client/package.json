@@ -3,6 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "description": "Interactive Frontend for AI Chatbot Museum Ticket Booking System",
+  "author": "MUNISH KUMAR <munish89942@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/munish89942/AI-chatbot-Ticket-booking-system.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

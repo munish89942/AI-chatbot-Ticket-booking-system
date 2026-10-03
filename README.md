@@ -13,7 +13,7 @@ A state-of-the-art, AI-powered museum ticket booking system featuring a conversa
 ## 📁 Project Structure
 
 ```
-scratch/
+AI-chatbot-Ticket-booking-system/
 ├── client/     # React frontend (Vite)
 └── server/     # Express.js backend
 ```
@@ -24,6 +24,13 @@ scratch/
 - Node.js 18+
 - A Google Gemini API Key
 - A Razorpay Test Account
+
+### Clone Repository
+
+```bash
+git clone https://github.com/munish89942/AI-chatbot-Ticket-booking-system.git
+cd AI-chatbot-Ticket-booking-system
+```
 
 ### 1. Backend Setup
 
