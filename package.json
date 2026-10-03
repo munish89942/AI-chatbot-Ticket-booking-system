@@ -1,0 +1,22 @@
+{
+  "name": "ai-chatbot-ticket-booking-system",
+  "version": "1.0.0",
+  "description": "AI-powered museum ticket booking system with conversational AI assistant (Gemini), interactive 3D visualizations, and Razorpay payment processing",
+  "private": true,
+  "author": "MUNISH KUMAR <munish89942@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/munish89942/AI-chatbot-Ticket-booking-system.git"
+  },
+  "scripts": {
+    "dev": "concurrently -n \"SERVER,CLIENT\" -c \"blue,magenta\" \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "start": "npm start --prefix server",
+    "build": "npm run build --prefix client",
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

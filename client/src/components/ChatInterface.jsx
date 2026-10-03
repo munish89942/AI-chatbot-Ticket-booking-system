@@ -65,17 +65,31 @@ export default function ChatInterface() {
         if (!bookingData) return;
         setLoading(true);
         try {
-            const slotsRes = await import('../services/api').then(m => m.getSlots());
-            const slot = slotsRes.data.find(s => s.label === bookingData.details.slot_label);
+            const { getSlots, getTickets, getPaymentConfig } = await import('../services/api');
+            const slotsRes = await getSlots();
+            const requestedSlot = (bookingData.details.slot_label || '').toLowerCase();
+            const slot = slotsRes.data.find(s => 
+                s.label.toLowerCase() === requestedSlot ||
+                s.label.toLowerCase().includes(requestedSlot) ||
+                requestedSlot.includes(s.label.toLowerCase()) ||
+                (requestedSlot.includes('morning') && s.label.toLowerCase().includes('morning')) ||
+                (requestedSlot.includes('afternoon') && s.label.toLowerCase().includes('afternoon')) ||
+                (requestedSlot.includes('evening') && s.label.toLowerCase().includes('evening'))
+            ) || slotsRes.data[0];
 
-            if (!slot) throw new Error("Slot not found");
+            if (!slot) throw new Error("No time slots available");
 
-            const ticketsRes = await import('../services/api').then(m => m.getTickets());
+            const ticketsRes = await getTickets();
             let total = 0;
-            Object.entries(bookingData.details.tickets).forEach(([type, count]) => {
-                const t = ticketsRes.data.find(t => t.name === type);
-                if (t) total += t.price * count;
+            Object.entries(bookingData.details.tickets || {}).forEach(([type, count]) => {
+                const t = ticketsRes.data.find(tk => 
+                    tk.name.toLowerCase() === type.toLowerCase() ||
+                    type.toLowerCase().includes(tk.name.toLowerCase())
+                );
+                total += (t ? t.price : 50) * Number(count || 1);
             });
+
+            if (total === 0) total = 50;
 
             const orderRes = await createOrder({
                 amount: total,
@@ -84,18 +98,52 @@ export default function ChatInterface() {
             });
 
             const order = orderRes.data;
-            const isLoaded = await loadRazorpayScript();
-            if (!isLoaded) {
-                alert("Razorpay SDK failed to load. Are you online?");
+
+            // Fetch dynamic Razorpay key if available
+            let rzpKey = import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_SL6WjyJenfFI9e";
+            try {
+                const configRes = await getPaymentConfig();
+                if (configRes.data?.keyId) rzpKey = configRes.data.keyId;
+            } catch (err) {
+                console.warn("Using default Razorpay key:", err);
+            }
+
+            // Handle demo orders directly
+            if (order.id && order.id.startsWith('order_demo_')) {
+                const verifyRes = await verifyPayment({
+                    razorpay_order_id: order.id,
+                    razorpay_payment_id: `pay_demo_${Date.now()}`,
+                    razorpay_signature: 'demo_signature',
+                    customerDetails: {
+                        name: "Visitor",
+                        date: bookingData.details.date,
+                        slotId: slot.id,
+                        tickets: bookingData.details.tickets,
+                        totalPrice: total
+                    }
+                });
+
+                const ticketCode = verifyRes.data.ticketCode;
+                const ticketId = verifyRes.data.bookingId;
+                setBookingData(null);
+                setMessages(prev => [...prev, {
+                    role: 'assistant',
+                    content: `✅ **Booking Confirmed!**\n\nYour ticket for **${bookingData.details.date}** (${slot.label}) has been confirmed.\n\n🎟️ **TICKET CODE: ${ticketCode}**\n*(Reference ID: #${ticketId})*\n\nPlease show this code at the museum entrance. Enjoy your visit!`
+                }]);
                 return;
             }
 
+            const isLoaded = await loadRazorpayScript();
+            if (!isLoaded) {
+                throw new Error("Razorpay SDK failed to load. Please check your internet connection.");
+            }
+
             const options = {
-                key: "rzp_test_SL6WjyJenfFI9e",
+                key: rzpKey,
                 amount: order.amount,
                 currency: order.currency,
                 name: "Museum AI",
-                description: "Ticket Booking",
+                description: "Museum Ticket Booking",
                 order_id: order.id,
                 handler: async function (response) {
                     try {
@@ -117,7 +165,7 @@ export default function ChatInterface() {
 
                         setMessages(prev => [...prev, {
                             role: 'assistant',
-                            content: `✅ **Payment Successful!**\n\nYour ticket for **${bookingData.details.date}** has been confirmed.\n\n🎟️ **TICKET CODE: ${ticketCode}**\n*(Reference ID: #${ticketId})*\n\nPlease show this code at the museum entrance. Enjoy your visit!`
+                            content: `✅ **Payment Successful!**\n\nYour ticket for **${bookingData.details.date}** (${slot.label}) has been confirmed.\n\n🎟️ **TICKET CODE: ${ticketCode}**\n*(Reference ID: #${ticketId})*\n\nPlease show this code at the museum entrance. Enjoy your visit!`
                         }]);
 
                     } catch (err) {
@@ -133,6 +181,9 @@ export default function ChatInterface() {
             };
 
             const paymentObject = new window.Razorpay(options);
+            paymentObject.on('payment.failed', function (resp) {
+                alert("Payment failed: " + (resp.error?.description || "Unknown error"));
+            });
             paymentObject.open();
 
         } catch (error) {

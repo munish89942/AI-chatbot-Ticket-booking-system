@@ -21,6 +21,7 @@ export const bookTicket = (bookingData) => api.post('/book', bookingData);
 export const chatWithAI = (message, history) => api.post('/chat', { message, history });
 export const createOrder = (orderData) => api.post('/payment/order', orderData);
 export const verifyPayment = (paymentData) => api.post('/payment/verify', paymentData);
+export const getPaymentConfig = () => api.get('/payment/config');
 
 // Admin
 export const getBookings = () => api.get('/admin/bookings');

@@ -3,7 +3,8 @@ const db = require('./database');
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'dummy-key');
-const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
+const DEFAULT_MODEL = process.env.GEMINI_MODEL || "gemini-flash-latest";
+const FALLBACK_MODELS = [DEFAULT_MODEL, "gemini-1.5-flash", "gemini-2.0-flash", "gemini-pro"];
 
 async function getSystemContext() {
     return new Promise((resolve, reject) => {
@@ -94,25 +95,38 @@ Help visitors book tickets. You must collect:
         });
 
         // Current message is sent via chat.sendMessage, not added to history initialization usually?
-        // Actually, startChat takes history.
-
-        const chat = model.startChat({
-            history: geminiHistory,
-            generationConfig: {
-                maxOutputTokens: 1000,
-            },
-        });
-
         if (!process.env.GEMINI_API_KEY) {
             console.warn("No GEMINI_API_KEY found.");
             throw new Error("Missing GEMINI_API_KEY");
         }
 
-        const result = await chat.sendMessage(message);
-        const response = await result.response;
-        const text = response.text();
+        let text = null;
+        let lastError = null;
 
-        return { role: 'assistant', content: text };
+        for (const candidate of FALLBACK_MODELS) {
+            try {
+                const candidateModel = genAI.getGenerativeModel({ model: candidate });
+                const chat = candidateModel.startChat({
+                    history: geminiHistory,
+                    generationConfig: {
+                        maxOutputTokens: 1000,
+                    },
+                });
+                const result = await chat.sendMessage(message);
+                const response = await result.response;
+                text = response.text();
+                if (text) break;
+            } catch (err) {
+                lastError = err;
+                console.warn(`Model ${candidate} failed: ${err.message}, trying next...`);
+            }
+        }
+
+        if (text) {
+            return { role: 'assistant', content: text };
+        }
+
+        throw lastError || new Error("All Gemini models failed to respond.");
 
     } catch (error) {
         console.error("Gemini AI Error:", error);

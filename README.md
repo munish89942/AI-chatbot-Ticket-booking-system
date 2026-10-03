@@ -32,7 +32,28 @@ git clone https://github.com/munish89942/AI-chatbot-Ticket-booking-system.git
 cd AI-chatbot-Ticket-booking-system
 ```
 
-### 1. Backend Setup
+### Quick Start (Single Command)
+
+```bash
+# 1. Install all dependencies for root, server, and client
+npm run install:all
+
+# 2. Configure environment in server/.env
+cp server/.env.example server/.env # or create server/.env
+
+# 3. Start both backend and frontend concurrently
+npm run dev
+```
+
+The app will be available at:
+- **Frontend**: `http://localhost:5173`
+- **Backend API**: `http://localhost:3001`
+
+---
+
+### Manual Setup (Separate Terminals)
+
+#### 1. Backend Setup
 
 ```bash
 cd server
@@ -49,10 +70,10 @@ RAZORPAY_KEY_SECRET=your_razorpay_secret
 
 Start the server:
 ```bash
-node server.js
+npm run dev # or node server.js
 ```
 
-### 2. Frontend Setup
+#### 2. Frontend Setup
 
 ```bash
 cd client
